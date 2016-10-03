@@ -1,6 +1,6 @@
 # Completed step definitions for basic features: AddMovie, ViewDetails, EditMovie 
 
-Given /^I am on the RottenPotatoes home page$/ do
+ Given /^I am on the RottenPotatoes home page$/ do
   visit movies_path
  end
 
@@ -46,12 +46,12 @@ Given /^I am on the RottenPotatoes home page$/ do
 # Add a declarative step here for populating the DB with movies.
 
 Given /the following movies have been added to RottenPotatoes:/ do |movies_table|
-  pending  # Remove this statement when you finish implementing the test step
   movies_table.hashes.each do |movie|
     # Each returned movie will be a hash representing one row of the movies_table
     # The keys will be the table headers and the values will be the row contents.
     # Entries can be directly to the database with ActiveRecord methods
     # Add the necessary Active Record call(s) to populate the database.
+    Movie.create movie
   end
 end
 
@@ -59,16 +59,62 @@ When /^I have opted to see movies rated: "(.*?)"$/ do |arg1|
   # HINT: use String#split to split up the rating_list, then
   # iterate over the ratings and check/uncheck the ratings
   # using the appropriate Capybara command(s)
-  pending  #remove this statement after implementing the test step
+  allRatings = ['G', 'PG', 'PG-13', 'NC-17', 'R']
+  ratings = arg1
+  ratings.upcase!
+  selectedRatings = ratings.split(", ")
+  selectedRatings.uniq!
+  unselectedRatings = allRatings - selectedRatings
+  selectedRatings.each {|x|
+    id = "ratings[" + x + "]"
+    check id
+  }
+  unselectedRatings.each {|x|
+    id = "ratings[" + x + "]"
+    uncheck id
+  }
+  click_button('ratings_submit')
 end
 
 Then /^I should see only movies rated: "(.*?)"$/ do |arg1|
-  pending  #remove this statement after implementing the test step
+  ratings = arg1
+  ratings.upcase!
+  selectedRatings = ratings.split(", ")
+  selectedRatings.uniq!
+  size = Movie.where(:rating => selectedRatings).all.size
+  size.should == ((page.all('table#movies tr').count) - 1)  
+  page.all('table#movies td').each {|td|
+    if td.inspect.last(4).first == "2"
+      expect(selectedRatings.include?(td.text)).to be_truthy
+    end
+  }  
 end
 
 Then /^I should see all of the movies$/ do
-  pending  #remove this statement after implementing the test step
+  size = Movie.all.size
+  size.should == ((page.all('table#movies tr').count) - 1)
 end
 
+Given /^I filter on "(.*?)"$/ do |filter|
+  click_link(filter)
+end
+
+
+Then /^I should see the movies filtered by "(.*?)"$/ do |filter|
+  colMapping = {"title" => "1", "release_date" => "3"}
+  elementList = ""
+  page.all('table#movies td').each {|td|
+    if td.inspect.last(4).first == colMapping[filter]
+      elementList << td.text
+    end
+  }  
+  elements = Movie.order(filter)
+  expectedElementList = ""
+  elements.each {|x|
+    hashX = x.to_json
+    expectedElementList << x[filter].to_s
+  }
+  expect(elementList == expectedElementList).to be_truthy
+end
 
 

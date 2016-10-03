@@ -22,8 +22,13 @@ Background: movies have been added to database
   And I am on the RottenPotatoes home page
 
 Scenario: sort movies alphabetically
-  # your scenario here
+  When I have opted to see movies rated: "G, PG, PG-13, NC-17, R"
+  And  I filter on "Movie Title"
+  Then I should see the movies filtered by "title"
 
-Scenario: sort movies in increasing order of release date
-  # your scenario here
+
+#Scenario: sort movies in increasing order of release date
+  When I have opted to see movies rated: "G, PG, PG-13, NC-17, R"
+  And  I filter on "Release Date"
+  Then I should see the movies filtered by "release_date"
 
