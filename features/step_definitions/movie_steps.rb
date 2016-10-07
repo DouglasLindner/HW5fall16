@@ -51,7 +51,7 @@ Given /the following movies have been added to RottenPotatoes:/ do |movies_table
     # The keys will be the table headers and the values will be the row contents.
     # Entries can be directly to the database with ActiveRecord methods
     # Add the necessary Active Record call(s) to populate the database.
-    Movie.create movie
+    Movie.create movie #active record call to create movies
   end
 end
 
@@ -62,16 +62,16 @@ When /^I have opted to see movies rated: "(.*?)"$/ do |arg1|
   allRatings = ['G', 'PG', 'PG-13', 'NC-17', 'R']
   ratings = arg1
   ratings.upcase!
-  selectedRatings = ratings.split(", ")
+  selectedRatings = ratings.split(", ") #create array of selected ratings
   selectedRatings.uniq!
-  unselectedRatings = allRatings - selectedRatings
+  unselectedRatings = allRatings - selectedRatings #create array of unselected ratings
   selectedRatings.each {|x|
     id = "ratings[" + x + "]"
-    check id
+    check id #check appropriate desired ratings
   }
   unselectedRatings.each {|x|
     id = "ratings[" + x + "]"
-    uncheck id
+    uncheck id #uncheck appropriate undesired ratings
   }
   click_button('ratings_submit')
 end
@@ -79,42 +79,45 @@ end
 Then /^I should see only movies rated: "(.*?)"$/ do |arg1|
   ratings = arg1
   ratings.upcase!
-  selectedRatings = ratings.split(", ")
+  selectedRatings = ratings.split(", ") #create array of selected ratings
   selectedRatings.uniq!
-  size = Movie.where(:rating => selectedRatings).all.size
-  size.should == ((page.all('table#movies tr').count) - 1)  
-  page.all('table#movies td').each {|td|
-    if td.inspect.last(4).first == "2"
-      expect(selectedRatings.include?(td.text)).to be_truthy
+  size = Movie.where(:rating => selectedRatings).all.size #find number of movies with selected ratings in database
+  size.should == ((page.all('table#movies tr').count) - 1) #find number of movies with selected ratings in html and compare with database query
+  page.all('table#movies td').each {|td| #navigate through table records
+    if td.inspect.last(4).first == "2" #look at tables column
+      expect(selectedRatings.include?(td.text)).to be_truthy #make sure rating is in expected ratings array
     end
   }  
 end
 
 Then /^I should see all of the movies$/ do
-  size = Movie.all.size
-  size.should == ((page.all('table#movies tr').count) - 1)
+  size = Movie.all.size #count all movies in database
+  size.should == ((page.all('table#movies tr').count) - 1) #find number of movies in html and compare with database query
 end
 
-Given /^I filter on "(.*?)"$/ do |filter|
+When /^I filter on "(.*?)"$/ do |filter|
   click_link(filter)
 end
 
 
-Then /^I should see the movies filtered by "(.*?)"$/ do |filter|
-  colMapping = {"title" => "1", "release_date" => "3"}
+Then /^I should see all of the movies filtered by "(.*?)"$/ do |filter|
+  colMapping = {"title" => "1", "release_date" => "3"} #mapping based on desired filter to promote dryness
   elementList = ""
-  page.all('table#movies td').each {|td|
-    if td.inspect.last(4).first == colMapping[filter]
-      elementList << td.text
+  page.all('table#movies td').each {|td| #look through all table cells
+    if td.inspect.last(4).first == colMapping[filter] #checking the column of the data values
+      elementList << td.text #push all of the html data values into an array
     end
   }  
-  elements = Movie.order(filter)
+  elements = Movie.order(filter) #Getting all elements from database filtered on input column
   expectedElementList = ""
   elements.each {|x|
     hashX = x.to_json
-    expectedElementList << x[filter].to_s
+    expectedElementList << x[filter].to_s #converting hash format to array format
   }
-  expect(elementList == expectedElementList).to be_truthy
+  expect(elementList == expectedElementList).to be_truthy #expect database ordering to equal html ordering
 end
 
 
+Then /^I should see "(.*?)" before "(.*?)"$/ do |arg1, arg2|
+  expect(page.body =~ /#{arg1}.*#{arg2}/m).to be_truthy #point check for reg expression matching
+end

@@ -24,11 +24,15 @@ Background: movies have been added to database
 Scenario: sort movies alphabetically
   When I have opted to see movies rated: "G, PG, PG-13, NC-17, R"
   And  I filter on "Movie Title"
-  Then I should see the movies filtered by "title"
-
+  Then I should see all of the movies filtered by "title"
+  And  I should see "Aladdin" before "Amelie"
+  And  I should see "Chocolat" before "The Incredibles"
+  And  I should see "Chicken Run" before "The Help"
 
 #Scenario: sort movies in increasing order of release date
   When I have opted to see movies rated: "G, PG, PG-13, NC-17, R"
   And  I filter on "Release Date"
-  Then I should see the movies filtered by "release_date"
-
+  Then I should see all of the movies filtered by "release_date"
+  And  I should see "1992-11-25" before "2011-08-10"
+  And  I should see "1968-04-06" before "1981-06-12"
+  And  I should see "1984-10-26" before "2000-06-21"
