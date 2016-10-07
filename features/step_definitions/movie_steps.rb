@@ -96,11 +96,14 @@ Then /^I should see all of the movies$/ do
 end
 
 When /^I filter on "(.*?)"$/ do |filter|
-  click_link(filter)
+  mapping = {"movie title" => "Movie Title", "release date" => "Release Date"} #mapping for dryness
+  click_link(mapping[filter])
 end
 
 
 Then /^I should see all of the movies filtered by "(.*?)"$/ do |filter|
+  mapping = {"movie title" => "title", "release date" => "release_date"} #mapping for dryness
+  filter = mapping[filter]
   colMapping = {"title" => "1", "release_date" => "3"} #mapping based on desired filter to promote dryness
   elementList = ""
   page.all('table#movies td').each {|td| #look through all table cells
